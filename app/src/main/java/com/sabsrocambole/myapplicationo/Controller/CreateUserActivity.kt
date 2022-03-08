@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import com.sabsrocambole.myapplicatione4.R
 import com.sabsrocambole.myapplicationo.Services.AuthService
+import org.w3c.dom.Text
 import java.util.*
 
 
@@ -15,6 +17,8 @@ class CreateUserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_user)
     }
+    var createEmailText = findViewById<TextView>(R.id.createEmailText)
+    var createPassword = findViewById<TextView>(R.id.createPasswordText)
 
     var createAvatarImageView = findViewById<ImageView>(R.id.createAvatarImageView)
     var userAvatar = "profileDefault"
@@ -51,8 +55,18 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClicked(view: View){
-        AuthService.registerUser(this,"j@j.com","123456"){
+        val email = createEmailText.toString()
+        val password = createPassword.toString()
+        AuthService.registerUser(this,email,password){registerSuccess ->
+            if(registerSuccess){
+                AuthService.loginUser(this,email,password){ loginSuccess ->
+                    if (loginSuccess){
+                        println(AuthService.authToken)
+                        println(AuthService.userEmail)
+                    }
 
+                }
+            }
         }
     }
 
