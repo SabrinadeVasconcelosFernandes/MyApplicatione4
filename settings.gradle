@@ -14,3 +14,9 @@ dependencyResolutionManagement {
 }
 rootProject.name = "My Applicationo"
 include ':app'
+
+rootProject.name = 'volley'
+include 'core'
+include 'cronet'
+include 'testing'
+

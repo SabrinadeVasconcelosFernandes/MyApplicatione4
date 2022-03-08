@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import com.sabsrocambole.myapplicatione4.R
+import com.sabsrocambole.myapplicationo.Services.AuthService
 import java.util.*
 
 
@@ -34,7 +35,7 @@ class CreateUserActivity : AppCompatActivity() {
         createAvatarImageView.setImageResource(resourceId)
     }
 
-    fun createUserClicked(view: View){
+    fun generateColorClicked(view: View){
         val random = Random()
         val r = random.nextInt(255)
         val g = random.nextInt(255)
@@ -47,11 +48,14 @@ class CreateUserActivity : AppCompatActivity() {
         val savedB = b.toDouble()/255
 
         avatarColor = "[$savedR,$savedG,$savedB,1]"
-
     }
 
-    fun generateColorClicked(view: View){
+    fun createUserClicked(view: View){
+        AuthService.registerUser(this,"j@j.com","123456"){
 
+        }
     }
+
+
 
 }
