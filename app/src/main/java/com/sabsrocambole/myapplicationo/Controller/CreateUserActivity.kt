@@ -19,7 +19,7 @@ class CreateUserActivity : AppCompatActivity() {
     }
     var createEmailText = findViewById<TextView>(R.id.createEmailText)
     var createPassword = findViewById<TextView>(R.id.createPasswordText)
-
+    val createUserNameText = findViewById<TextView>(R.id.createUserNameText)
     var createAvatarImageView = findViewById<ImageView>(R.id.createAvatarImageView)
     var userAvatar = "profileDefault"
     var avatarColor = "[0.5, 0.5, 0.5, 1]"
@@ -55,14 +55,18 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClicked(view: View){
+        val userName = createUserNameText.toString()
         val email = createEmailText.toString()
         val password = createPassword.toString()
         AuthService.registerUser(this,email,password){registerSuccess ->
             if(registerSuccess){
                 AuthService.loginUser(this,email,password){ loginSuccess ->
                     if (loginSuccess){
-                        println(AuthService.authToken)
-                        println(AuthService.userEmail)
+                        AuthService.createUser(this,userName,email,userAvatar,avatarColor){
+                            createSuccess -> if(createSuccess){
+                                    finish()
+                            }
+                        }
                     }
 
                 }
