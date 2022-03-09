@@ -5,3 +5,8 @@ const val BASE_URL = "https://10.0.2.2:3005/v1/" //-->local
 const val URL_REGISTER = "${BASE_URL}account/register"
 const val URL_LOGIN = "${BASE_URL}accont/login"
 const val URL_CREATE_USER = "${BASE_URL}user/add"
+
+//broadcast constants
+
+const val BROADCAST_USER_DATA_CHANGE = "BROADCAST_USER_DATA_CHANGE"
+
