@@ -1,8 +1,15 @@
 package com.sabsrocambole.myapplicationo.Controller
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
@@ -13,8 +20,12 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.sabsrocambole.myapplicatione4.R
 import com.sabsrocambole.myapplicatione4.databinding.ActivityMainBinding
+import com.sabsrocambole.myapplicationo.Services.AuthService
+import com.sabsrocambole.myapplicationo.Services.UserDataService
+import com.sabsrocambole.myapplicationo.Utilities.BROADCAST_USER_DATA_CHANGE
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,6 +33,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     //val toolbar = findViewById<Toolbar>(R.id.toolbar)
+    val userNameNavHeader = findViewById<TextView>(R.id.userNameNavHeader)
+    val userEmailNavHeader = findViewById<TextView>(R.id.userEmailNavHeader)
+    val userImageNavHeader = findViewById<ImageView>(R.id.userImageNavHeader)
+    val loginBtnNavHeader = findViewById<Button>(R.id.loginBtnNavHeader)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +72,26 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        //local broadcast
+        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
+            IntentFilter(BROADCAST_USER_DATA_CHANGE)
+        )
+
+    }
+    private val userDataChangeReceiver = object: BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if(AuthService.isLoggedIn){
+                userNameNavHeader.text = UserDataService.name
+                userEmailNavHeader.text = UserDataService.email
+                val resourceId = resources.getIdentifier(UserDataService.avatarName, "drawable",packageName)
+                userImageNavHeader.setImageResource(resourceId)
+                userImageNavHeader.setBackgroundColor(UserDataService.returnsAvatarColor(UserDataService.avatarColor))
+                loginBtnNavHeader.text = "Logout"
+            }
+        }
+        
     }
 
 
@@ -69,8 +104,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun loginBtnNavClicked(view:View){
-        val loginIntent = Intent(this, LoginActivity::class.java)
-        startActivity(loginIntent)
+
+        if(AuthService.isLoggedIn){
+            //log out
+            UserDataService.logout()
+            userNameNavHeader.text = "Login"
+            userEmailNavHeader.text = ""
+            userImageNavHeader.setImageResource(R.drawable.profiledefault)
+            userImageNavHeader.setBackgroundColor(Color.TRANSPARENT)
+            loginBtnNavHeader.text = "Login"
+        }
+        else{
+            //log in
+            val loginIntent = Intent(this, LoginActivity::class.java)
+            startActivity(loginIntent)
+        }
+
     }
 
     fun addChannelClicked(view:View){
