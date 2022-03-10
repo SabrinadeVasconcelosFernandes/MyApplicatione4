@@ -3,9 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable-v24/rounded_gradient.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_create_user.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/add_channel_dialog.xml" value="0.10908050537109376" />
         <entry key="app/src/main/res/layout/content_main.xml" value="0.1" />
       </map>
     </option>
