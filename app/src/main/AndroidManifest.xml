@@ -10,7 +10,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplicationo">
+        android:theme="@style/Theme.MyApplicationo"
+        android:name=".Controller.App" >
         <activity
             android:name=".Controller.LoginActivity"
             android:exported="false" />

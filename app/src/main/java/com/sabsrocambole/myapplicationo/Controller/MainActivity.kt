@@ -7,10 +7,7 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
@@ -37,10 +34,17 @@ import kotlinx.coroutines.Dispatchers.IO
 class MainActivity : AppCompatActivity() {
 
     val socket = IO.socket(SOCKET_URL)
+    lateinit var channelAdapter: ArrayAdapter<Channel>
+
+    private fun setupAdapters(){
+        channelAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1,MessageService.channels)
+        channel_list.adapter = channelAdapter
+    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     //val toolbar = findViewById<Toolbar>(R.id.toolbar)
+    val channel_list = findViewById<ListView>(R.id.channel_list)
     val userNameNavHeader = findViewById<TextView>(R.id.userNameNavHeader)
     val userEmailNavHeader = findViewById<TextView>(R.id.userEmailNavHeader)
     val userImageNavHeader = findViewById<ImageView>(R.id.userImageNavHeader)
@@ -72,7 +76,11 @@ class MainActivity : AppCompatActivity() {
             this, drawerLayout,binding.appBarMain.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
+        setupAdapters()
 
+        if(App.prefs.isLoggedIn){
+            AuthService.findUsersByEmail(this){}
+        }
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -106,14 +114,20 @@ class MainActivity : AppCompatActivity() {
 
     private val userDataChangeReceiver = object: BroadcastReceiver() {
 
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if(AuthService.isLoggedIn){
+        override fun onReceive(context: Context, intent: Intent?) {
+            if(App.prefs.isLoggedIn){
                 userNameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
                 val resourceId = resources.getIdentifier(UserDataService.avatarName, "drawable",packageName)
                 userImageNavHeader.setImageResource(resourceId)
                 userImageNavHeader.setBackgroundColor(UserDataService.returnsAvatarColor(UserDataService.avatarColor))
                 loginBtnNavHeader.text = "Logout"
+
+                MessageService.getChannels(context){complete->
+                    if (complete){
+                        channelAdapter.notifyDataSetChanged()
+                    }
+                }
             }
         }
         
@@ -130,7 +144,7 @@ class MainActivity : AppCompatActivity() {
     }
     fun loginBtnNavClicked(view:View){
 
-        if(AuthService.isLoggedIn){
+        if(App.prefs.isLoggedIn){
             //log out
             UserDataService.logout()
             userNameNavHeader.text = ""
@@ -148,7 +162,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addChannelClicked(view:View){
-        if(AuthService.isLoggedIn){
+        if(App.prefs.isLoggedIn){
             val builder = AlertDialog.Builder(this)
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog,null)
 
@@ -180,6 +194,7 @@ class MainActivity : AppCompatActivity() {
 
             val newChannel = Channel(channelName,channelDescription,channelId)
             MessageService.channels.add(newChannel)
+            channelAdapter.notifyDataSetChanged()
         }
 
     }
