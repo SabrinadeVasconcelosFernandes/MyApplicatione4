@@ -23,9 +23,11 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.sabsrocambole.geradordeabas.Model.Channel
 import com.sabsrocambole.myapplicatione4.R
 import com.sabsrocambole.myapplicatione4.databinding.ActivityMainBinding
 import com.sabsrocambole.myapplicationo.Services.AuthService
+import com.sabsrocambole.myapplicationo.Services.MessageService
 import com.sabsrocambole.myapplicationo.Services.UserDataService
 import com.sabsrocambole.myapplicationo.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.sabsrocambole.myapplicationo.Utilities.SOCKET_URL
@@ -53,6 +55,8 @@ class MainActivity : AppCompatActivity() {
 
 
         setSupportActionBar(binding.appBarMain.toolbar)
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
 
 
         binding.appBarMain.fab.setOnClickListener { view ->
@@ -88,20 +92,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE))
-        socket.connect()
-    }
 
-    override fun onPause() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
-            IntentFilter(BROADCAST_USER_DATA_CHANGE))
-        super.onPause()
+        super.onResume()
     }
 
     override fun onDestroy() {
         socket.disconnect()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
         super.onDestroy()
     }
 
@@ -172,6 +171,19 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
     }
+
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread(){
+            val channelName = args[0] as String
+            val channelDescription = args[1] as String
+            val channelId = args[2] as String
+
+            val newChannel = Channel(channelName,channelDescription,channelId)
+            MessageService.channels.add(newChannel)
+        }
+
+    }
+
     fun sendMessageBtnClicked(view: View){
         hideKeyboard()
     }
