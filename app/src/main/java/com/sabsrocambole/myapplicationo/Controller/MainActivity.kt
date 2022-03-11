@@ -28,9 +28,13 @@ import com.sabsrocambole.myapplicatione4.databinding.ActivityMainBinding
 import com.sabsrocambole.myapplicationo.Services.AuthService
 import com.sabsrocambole.myapplicationo.Services.UserDataService
 import com.sabsrocambole.myapplicationo.Utilities.BROADCAST_USER_DATA_CHANGE
+import com.sabsrocambole.myapplicationo.Utilities.SOCKET_URL
+import kotlinx.coroutines.Dispatchers.IO
 
 
 class MainActivity : AppCompatActivity() {
+
+    val socket = IO.socket(SOCKET_URL)
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -65,7 +69,6 @@ class MainActivity : AppCompatActivity() {
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        hideKeyboard()
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -83,6 +86,25 @@ class MainActivity : AppCompatActivity() {
         )
 
     }
+
+    override fun onResume() {
+        super.onResume()
+        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
+            IntentFilter(BROADCAST_USER_DATA_CHANGE))
+        socket.connect()
+    }
+
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
+            IntentFilter(BROADCAST_USER_DATA_CHANGE))
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        super.onDestroy()
+    }
+
     private val userDataChangeReceiver = object: BroadcastReceiver() {
 
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -140,17 +162,18 @@ class MainActivity : AppCompatActivity() {
                     val channelDesc = descTextField.text.toString()
 
                     //Create channel
-                    hideKeyboard()
+                    socket.emit("newChannel", channelName,channelDesc)
+
                 }
                 .setNegativeButton("Cancel") {dialogInterface, i ->
                     //cancel and close the dialog
-                    hideKeyboard()
+
                 }
                 .show()
         }
     }
     fun sendMessageBtnClicked(view: View){
-
+        hideKeyboard()
     }
 
     fun hideKeyboard(){
